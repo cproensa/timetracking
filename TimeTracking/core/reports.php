@@ -184,6 +184,30 @@ class Report {
 		$t_where[] = 'TT.bug_id IN ' . $t_query->param( $this->build_filter_subquery() ) . '' ;
 		//$t_where[] = $t_query->sql_in( 'TT.bug_id', $this->build_filter_subquery() );
 
+		# Remove projects where timetracking is disabled or non-visible
+		$t_all_included_projects = filter_get_included_projects( $this->bug_filter );
+		$t_projects_include = array();
+		$t_projects_exclude = array();
+		foreach( $t_all_included_projects as $t_project_id ) {
+			if( !enabled_for_project( $t_project_id )
+				|| !user_can_view_project_id( $t_project_id ) ) {
+				$t_projects_exclude[] = (int)$t_project_id;
+			} else {
+				$t_projects_include[] = (int)$t_project_id;
+			}
+		}
+		if( count( $t_projects_include ) <> count( $t_all_included_projects ) ) {
+			if( count( $t_projects_include ) <= $t_projects_exclude ) {
+				$t_op = '';
+				$t_list = $t_projects_include;
+			} else {
+				$t_op = 'NOT ';
+				$t_list = $t_projects_exclude;
+			}
+			$t_where[] = '{bug}.project_id ' . $t_op . 'IN ('
+					. implode( ',', $t_list ) . ')';
+		}
+
 		# main query
 		$t_cols_select = implode( ', ', $t_select_columns );
 		if( !empty( $t_select_columns ) ) {

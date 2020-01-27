@@ -67,6 +67,7 @@ class TimeTrackingPlugin extends MantisPlugin {
 			'reporting_threshold' => MANAGER,
 
 			'stopwatch_enabled' => ON,
+			'enabled' => ON,
 
 			'categories'       => ''
 		);
@@ -111,6 +112,9 @@ class TimeTrackingPlugin extends MantisPlugin {
 	 * Show time tracking info within the bugnote activity area
 	 */
 	function ev_view_bugnote( $p_event, $p_bug_id, $p_note_id, $p_is_private ) {
+		if( !TimeTracking\enabled_for_bug( $p_bug_id ) ) {
+			return;
+		}
 		$t_record = TimeTracking\get_record_for_bugnote( $p_note_id );
 		if( !$t_record ) {
 			return;
@@ -126,6 +130,9 @@ class TimeTrackingPlugin extends MantisPlugin {
 	 * @param type $p_bug_id
 	 */
 	function ev_bugnote_add_form( $p_event, $p_bug_id ) {
+		if( !TimeTracking\enabled_for_bug( $p_bug_id ) ) {
+			return;
+		}
 		if( TimeTracking\user_can_edit_bug_id( $p_bug_id ) ) {
 			TimeTracking\print_bugnote_add_form( $p_bug_id );
 		}
@@ -135,6 +142,9 @@ class TimeTrackingPlugin extends MantisPlugin {
 	 * Validates time tracking submitted data when adding bugnotes
 	 */
 	function ev_bugnote_add_validate( $p_event, $p_bugnote_text, $p_bug_id ) {
+		if( !TimeTracking\enabled_for_bug( $p_bug_id ) ) {
+			return $p_bugnote_text;
+		}
 		$t_time_imput = gpc_get_string( 'plugin_timetracking_time_input', '' );
 		if( !is_blank( $t_time_imput ) ) {
 			if( TimeTracking\user_can_edit_bug_id( $p_bug_id ) ) {
@@ -148,6 +158,9 @@ class TimeTrackingPlugin extends MantisPlugin {
 	 * Creates a time tracking record from submitted data when adding bugnotes
 	 */
 	function ev_bugnote_added( $p_event, $p_bug_id, $p_bugnote_id ) {
+		if( !TimeTracking\enabled_for_bug( $p_bug_id ) ) {
+			return;
+		}
 		$t_time_imput = gpc_get_string( 'plugin_timetracking_time_input', '' );
 		if( !is_blank( $t_time_imput ) ) {
 			if( TimeTracking\user_can_edit_bug_id( $p_bug_id ) ) {
@@ -160,6 +173,9 @@ class TimeTrackingPlugin extends MantisPlugin {
 	}
 
 	function ev_view_bug_details( $p_event, $p_bug_id ) {
+		if( !TimeTracking\enabled_for_bug( $p_bug_id ) ) {
+			return;
+		}
 		if( TimeTracking\user_can_view_bug_id( $p_bug_id ) ) {
 			$t_records = TimeTracking\get_records_for_bug( $p_bug_id );
 			if( $t_records ) {
@@ -175,6 +191,9 @@ class TimeTrackingPlugin extends MantisPlugin {
 	}
 
 	function ev_view_bug( $p_event, $p_bug_id ) {
+		if( !TimeTracking\enabled_for_bug( $p_bug_id ) ) {
+			return;
+		}
 		if( TimeTracking\user_can_view_bug_id( $p_bug_id ) ) {
 			TimeTracking\print_bug_timetracking_section( $p_bug_id );
 		}
@@ -220,7 +239,7 @@ class TimeTrackingPlugin extends MantisPlugin {
 	}
 
 	function timerecord_menu( $p_event, $p_bug_id ) {
-		if( TimeTracking\user_can_view_bug_id( $p_bug_id ) ) {
+		if( TimeTracking\enabled_for_bug( $p_bug_id ) && TimeTracking\user_can_view_bug_id( $p_bug_id ) ) {
 			$t_href = '#timerecord';
 			return array( plugin_lang_get( 'timerecord_menu' ) => $t_href );
 		}
@@ -230,6 +249,10 @@ class TimeTrackingPlugin extends MantisPlugin {
 	}
 
 	function showreport_menu() {
+		$t_current_project = helper_get_current_project();
+		if( !TimeTracking\enabled_for_project( $t_current_project ) ) {
+			return;
+		}
 		return array(
 			array(
 				'title' => plugin_lang_get( 'title' ),

@@ -293,6 +293,24 @@ function user_can_view_project_id( $p_project_id ) {
 }
 
 /**
+ * Returns true if timetracking entries are enabled for the project
+ * @param integer $p_project_id		Project id
+ * @return boolean
+ */
+function enabled_for_project( $p_project_id ) {
+	return ON == plugin_config_get( 'enabled', null, false, ALL_USERS, $p_project_id );
+}
+
+/**
+ * Returns true if timetracking entries are enabled for the issue
+ * @param integer $p_bug_id		Bug id
+ * @return boolean
+ */
+function enabled_for_bug( $p_bug_id ) {
+	$t_project_id = bug_get_field( $p_bug_id, 'project_id' );
+	return enabled_for_project( $t_project_id );
+}
+/**
  * Prints the html to be included in bugnote form, to add a time tracking record
  * @param integer $p_bug_id		Bug id
  */
@@ -787,4 +805,11 @@ function print_form_button( $p_action_page, $p_label, $p_args_to_post = null, $p
 	print_hidden_inputs( $p_args_to_post );
 	echo '</fieldset>';
 	echo '</form>';
+}
+
+function unregister_global_config( $p_option ) {
+	global $g_cache_config_eval;
+	$t_var_name = 'g_' . $p_option;
+	unset( $g_cache_config_eval[$t_var_name] );
+	unset( $GLOBALS[$t_var_name] );
 }

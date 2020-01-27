@@ -31,11 +31,29 @@ function maybe_set_option( $name, $value ) {
 	}
 }
 
-maybe_set_option( 'edit_threshold', gpc_get_int( 'edit_threshold' ) );
-maybe_set_option( 'view_threshold', gpc_get_int( 'view_threshold' ) );
-maybe_set_option( 'reporting_threshold', gpc_get_int( 'reporting_threshold' ) );
-maybe_set_option( 'categories', gpc_get_string( 'categories' ) );
-maybe_set_option( 'stopwatch_enabled', gpc_get_int( 'stopwatch_enabled', OFF ) );
+if( gpc_isset( 'update-global' ) ) {
+	maybe_set_option( 'edit_threshold', gpc_get_int( 'edit_threshold' ) );
+	maybe_set_option( 'view_threshold', gpc_get_int( 'view_threshold' ) );
+	maybe_set_option( 'reporting_threshold', gpc_get_int( 'reporting_threshold' ) );
+	maybe_set_option( 'categories', gpc_get_string( 'categories' ) );
+	maybe_set_option( 'stopwatch_enabled', gpc_get_int( 'stopwatch_enabled', OFF ) );
+}
+
+if( gpc_isset( 'update-project' ) ) {
+	$f_enabled = gpc_get_int( 'entry_enabled' );
+	$f_project_id = gpc_get_int( 'project_id', ALL_PROJECTS );
+	switch( $f_enabled ) {
+		case 0:
+			plugin_config_set( 'enabled', OFF, ALL_USERS, $f_project_id );
+			break;
+		case 1:
+			plugin_config_set( 'enabled', ON, ALL_USERS, $f_project_id );
+			break;
+		case 2:
+			plugin_config_delete( 'enabled', ALL_USERS, $f_project_id );
+			break;
+	}
+}
 
 form_security_purge( 'plugin_TimeTracking_config_update' );
 print_successful_redirect( plugin_page( 'config_page', true ) );

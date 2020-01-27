@@ -28,12 +28,13 @@ class ColumnTotalTime extends \MantisColumn {
 	}
 
 	public function display( \BugData $p_bug, $p_columns_target ) {
-		$t_bug_id = $p_bug->id;
 		plugin_push_current( 'TimeTracking' );
-		if( user_can_view_bug_id( $t_bug_id ) ) {
-			$t_time = get_total_time_for_bug_id( $t_bug_id );
-			if( $t_time ) {
-				echo seconds_to_hms( $t_time );
+		if( enabled_for_bug( $p_bug->id ) ) {
+			if( user_can_view_bug_id( $p_bug->id ) ) {
+				$t_time = get_total_time_for_bug_id( $p_bug->id );
+				if( $t_time ) {
+					echo seconds_to_hms( $t_time );
+				}
 			}
 		}
 		plugin_pop_current();
@@ -51,7 +52,7 @@ class ColumnTotalTime extends \MantisColumn {
 		$t_valid_projects = array();
 		plugin_push_current( 'TimeTracking' );
 		foreach( $t_accessible_projects as $t_project_id ) {
-			if( user_can_view_project_id( $t_project_id ) ) {
+			if( enabled_for_project( $t_project_id ) && user_can_view_project_id( $t_project_id ) ) {
 				$t_valid_projects[] = (int)$t_project_id;
 			}
 		}
@@ -116,13 +117,14 @@ class ColumnMyTime extends \MantisColumn {
 	}
 
 	public function display( \BugData $p_bug, $p_columns_target ) {
-		$t_bug_id = $p_bug->id;
-		$t_user_id = auth_get_current_user_id();
 		plugin_push_current( 'TimeTracking' );
-		if( user_can_view_bug_id( $t_bug_id ) ) {
-			$t_time = get_total_time_for_bug_id( $t_bug_id, $t_user_id );
-			if( $t_time ) {
-				echo seconds_to_hms( $t_time );
+		if( enabled_for_bug( $p_bug->id ) ) {
+			$t_user_id = auth_get_current_user_id();
+			if( user_can_view_bug_id( $p_bug->id ) ) {
+				$t_time = get_total_time_for_bug_id( $p_bug->id, $t_user_id );
+				if( $t_time ) {
+					echo seconds_to_hms( $t_time );
+				}
 			}
 		}
 		plugin_pop_current();
@@ -134,7 +136,7 @@ class ColumnMyTime extends \MantisColumn {
 		$t_valid_projects = array();
 		plugin_push_current( 'TimeTracking' );
 		foreach( $t_accessible_projects as $t_project_id ) {
-			if( user_can_view_project_id( $t_project_id ) ) {
+			if( enabled_for_project( $t_project_id ) && user_can_view_project_id( $t_project_id ) ) {
 				$t_valid_projects[] = (int)$t_project_id;
 			}
 		}
