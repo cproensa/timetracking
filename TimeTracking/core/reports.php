@@ -110,12 +110,6 @@ class Report {
 	 */
 	protected function build_filter_subquery() {
 		# prepare filter subselect
-		if( !$this->bug_filter ) {
-			$t_filter = array();
-			$t_filter[FILTER_PROPERTY_HIDE_STATUS] = array( META_FILTER_NONE );
-			$t_filter = filter_ensure_valid_filter( $t_filter );
-			$this->bug_filter = $t_filter;
-		}
 		$t_query = new \BugFilterQuery( $this->bug_filter, \BugFilterQuery::QUERY_TYPE_IDS );
 		return $t_query;
 	}
@@ -181,6 +175,12 @@ class Report {
 		}
 
 		# bug filter
+		if( !$this->bug_filter ) {
+			$t_filter = array();
+			$t_filter[FILTER_PROPERTY_HIDE_STATUS] = array( META_FILTER_NONE );
+			$t_filter = filter_ensure_valid_filter( $t_filter );
+			$this->bug_filter = $t_filter;
+		}
 		$t_where[] = 'TT.bug_id IN ' . $t_query->param( $this->build_filter_subquery() ) . '' ;
 		//$t_where[] = $t_query->sql_in( 'TT.bug_id', $this->build_filter_subquery() );
 
