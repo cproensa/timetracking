@@ -358,7 +358,7 @@ function print_input_date( $p_input_basename, $p_time = null ) {
 	print_month_option_list( $t_date->format( 'm' ) );
 	echo '</select>';
 	echo '<select name="' . $p_input_basename . '_y" class="form-control input-sm">';
-	print_year_option_list( $t_current_date[0] );
+	print_year_option_list( $t_date->format( 'Y' ) );
 	echo '</select>';
 }
 
